@@ -1,8 +1,8 @@
 # Filter 'Add Existing' N:N Relationship Lookup Dynamics 365
 
-The first function shows the generic method for filtering N:N and 1:N add existing lookups. The second function shows an example of how this can be used. The second function (which you should customize to meet your specific requirements) should be used to replace the out-of-the-box function for the Mscrm.AddExistingRecordFromSubGridAssociated (N:N) or Mscrm.AddExistingRecordFromSubGridStandard (1:N) button/command. The parameters passed into the function are the same as the existing command, with the addition of the primary entity name to allow more control over when to filter.
-
 ![](https://user-images.githubusercontent.com/14048382/30041528-eb17b56a-923e-11e7-9b63-55fb0042ccb3.png)
+
+The first function shows the generic method for filtering N:N and 1:N add existing lookups. The second function shows an example of how this can be used. The second function (which you should customize to meet your specific requirements) should be used to replace the out-of-the-box function for the Mscrm.AddExistingRecordFromSubGridAssociated (N:N) or Mscrm.AddExistingRecordFromSubGridStandard (1:N) button/command. The parameters passed into the function are the same as the existing command, with the addition of the primary entity name to allow more control over when to filter.
 
 ```javascript
 // Filters an add existing lookup view (N:N or 1:N) - this function shouldn't need to change
