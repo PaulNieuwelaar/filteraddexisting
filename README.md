@@ -61,3 +61,8 @@ function filterAddExistingContact(gridTypeCode, gridControl, primaryEntity) {
     addExistingFromSubGridCustom(gridTypeCode, gridControl, crmWindow, fetch, layout, "Filtered Contacts");
 }
 ```
+
+Note: This code is unsupported, and is likely to break in any major releases (as it has in the past). The idea of sourcing this project on GitHub is that if/when it does break again, it can be updated here rather than having to release new blog posts and hoping people who have previously used it see it. Also if it breaks in an update and I don't get a chance to fix it, someone else can fix it :)
+
+Created by [Paul Nieuwelaar](http://paulnieuwelaar.wordpress.com) - [@paulnz1](https://twitter.com/paulnz1)  
+Sponsored by [Magnetism Solutions - Dynamics CRM Specialists](http://www.magnetismsolutions.com)
