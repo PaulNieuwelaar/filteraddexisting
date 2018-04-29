@@ -1,5 +1,4 @@
 // Custom function to call instead of the OOTB Add Existing button/command - all 3 parameters can be passed as CRM Parameters from the ribbon
-// The Mscrm.AddExistingRecordFromSubGridAssociated command now also applies to the 1:N button as well as the N:N button, so handle both
 function filterAddExistingContact(selectedEntityTypeName, selectedControl, firstPrimaryItemId) {
     if (selectedControl.getRelationshipName() == "new_account_contact") {
         // Custom Account -> Contact N:N - filters to show only contacts with this account as the parentcustomerid
