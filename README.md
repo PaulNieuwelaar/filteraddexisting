@@ -2,73 +2,14 @@
 
 ![](https://user-images.githubusercontent.com/14048382/30041528-eb17b56a-923e-11e7-9b63-55fb0042ccb3.png)
 
-#### NOTE: If you're using Dynamics 365 version 9.0+ this can now be done using supported code - see [source_v9.js](https://github.com/PaulNieuwelaar/filteraddexisting/blob/master/source_v9.js) for the code. Usage instructions coming soon. For all other versions, see below.
+As of Dynamics 365 version 9.0, it's now possible to achieve this functionality using supported code. For this reason I've completely rewritten this solution using supported lookup objects and Web API. I've maintained the orginal unsupported source code for anyone not yet on v9.0. I've also referenced the blog posts containing the code for earlier versions of CRM too. See below for links to source code and usage instructions for each.
 
-The first function shows the generic method for filtering N:N and 1:N add existing lookups. The second function shows an example of how this can be used. The second function (which you should customize to meet your specific requirements) should be used to replace the out-of-the-box function for the Mscrm.AddExistingRecordFromSubGridAssociated (N:N) or Mscrm.AddExistingRecordFromSubGridStandard (1:N) button/command for the "Add Existing {0}" SubGrid command bar. The parameters passed into the function are the same as the existing command, with the addition of the primary entity name to allow more control over when to filter. NOTE: v9.0 changed the first parameter to SelectedEntityTypeName, so this needs to be changed to SelectedEntityTypeCode.
-
-![](https://user-images.githubusercontent.com/14048382/39019255-c7df9ed2-447c-11e8-9e26-402ac2296ec0.PNG)
-
-```javascript
-// Filters an add existing lookup view (N:N or 1:N) - this function shouldn't need to change
-function addExistingFromSubGridCustom(gridTypeCode, gridControl, crmWindow, fetch, layout, viewName) {
-    var viewId = "{1DFB2B35-B07C-44D1-868D-258DEEAB88E2}"; // a dummy view ID
-    var relName = gridControl.GetParameter("relName");
-    var roleOrd = gridControl.GetParameter("roleOrd");
-
-    // Creates the custom view object
-    var customView = {
-        fetchXml: fetch,
-        id: viewId,
-        layoutXml: layout,
-        name: viewName,
-        recordType: gridTypeCode,
-        Type: 0
-    };
-
-    var parentObj = crmWindow.GetParentObject(null, 0);
-    var parameters = [gridTypeCode, "", relName, roleOrd, parentObj];
-    var callbackRef = crmWindow.Mscrm.Utilities.createCallbackFunctionObject("locAssocObjAction", crmWindow, parameters, false);
-
-    // Pops the lookup window with our view injected
-    crmWindow.LookupObjectsWithCallback(callbackRef, null, "multi", gridTypeCode, 0, null, "", null, null, null, null, null, null, viewId, [customView]);
-}
-
-// Filters the Contact N:N lookup view from Account to show only Pauls - this function is unique for your requirements
-function filterAddExistingContact(gridTypeCode, gridControl, primaryEntity) {
-    var crmWindow = Xrm.Internal.isTurboForm() ? parent.window : window;
-
-    if (primaryEntity != "account") {
-        crmWindow.Mscrm.GridRibbonActions.addExistingFromSubGridAssociated(gridTypeCode, gridControl); // Default N:N button click function
-        //crmWindow.Mscrm.GridRibbonActions.addExistingFromSubGridStandard(gridTypeCode, gridControl); // Default 1:N button click function
-        return;
-    }
-
-    // FetchXML to use for the custom view
-    var fetch = "<fetch version='1.0' output-format='xml-platform' mapping='logical' distinct='false'>" +
-        "  <entity name='contact'>" +
-        "    <attribute name='fullname' />" +
-        "    <order attribute='fullname' descending='false' />" +
-        "    <filter type='and'>" +
-        "      <condition attribute='statecode' operator='eq' value='0' />" +
-        "      <condition attribute='firstname' operator='eq' value='Paul' />" +
-        "    </filter>" +
-        "  </entity>" +
-        "</fetch>";
-
-    // Columns to display in the custom view (make sure to include these in the fetch query)
-    var layout = "<grid name='resultset' object='1' jump='contactid' select='1' icon='1' preview='1'>" +
-        "  <row name='result' id='contactid'>" +
-        "    <cell name='fullname' width='300' />" +
-        "  </row>" +
-        "</grid>";
-
-    addExistingFromSubGridCustom(gridTypeCode, gridControl, crmWindow, fetch, layout, "Filtered Contacts");
-}
-```
-
-Note: This code is unsupported, and is likely to break in any major releases (as it has in the past). The idea of sourcing this project on GitHub is that if/when it does break again, it can be updated here rather than having to release new blog posts and hoping people who have previously used it see it. Also if it breaks in an update and I don't get a chance to fix it, someone else can fix it :)
+* [Dynamics 365 v9.0 (supported code)](Dynamics-365-v9.0)
+* [Dynamics CRM 2016 (unsupported code)](Dynamics-CRM-2016)
+* [Dynamics CRM 2015 & 2013 (unsupported code)](https://www.magnetismsolutions.com/blog/paulnieuwelaar/2014/04/21/filter-n-n-add-existing-lookup-dynamics-crm-2013)
+* [Dynamics CRM 2011 UR12 (unsupported code)](https://www.magnetismsolutions.com/blog/paulnieuwelaar/2013/02/04/filter-n-n-add-existing-lookup-dynamics-crm-2011-rollup-12)
+* [Dynamics CRM 2011 (unsupported code)](http://danielcai.blogspot.co.nz/2011/12/filtered-lookup-for-existing-button-of.html)
+* [Dynamics CRM 4.0 (unsupported code)](http://danielcai.blogspot.co.nz/2011/02/mscrm-40-filtered-lookup-for-existing.html)
 
 Created by [Paul Nieuwelaar](http://paulnieuwelaar.wordpress.com) - [@paulnz1](https://twitter.com/paulnz1)  
 Sponsored by [Magnetism Solutions - Dynamics CRM Specialists](http://www.magnetismsolutions.com)
-
-[![](https://user-images.githubusercontent.com/14048382/30045114-3805d840-9256-11e7-9bdb-323760fb43ea.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=89YXEVDJPTFDG)
