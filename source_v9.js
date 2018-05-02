@@ -38,7 +38,7 @@ function associateAddExistingResults(relationshipName, primaryEntity, relatedEnt
         if (gridControl) { gridControl.refresh(); }
 
         // Clear the final notification after 2 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             Xrm.Page.ui.clearFormNotification("associate");
         }, 2000);
 
@@ -58,10 +58,10 @@ function associateAddExistingResults(relationshipName, primaryEntity, relatedEnt
         relatedId = parentRecordId;
     }
 
-    var association = { '@odata.id': Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + relatedEntity + "s(" + relatedId + ")" };
+    var association = { '@odata.id': Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + Xrm.Utility.getEntitySetName(relatedEntity) + "(" + relatedId + ")" };
 
     var req = new XMLHttpRequest();
-    req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + primaryEntity + "s(" + primaryId + ")/" + relationshipName + "/$ref", true);
+    req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + Xrm.Utility.getEntitySetName(primaryEntity) + "(" + primaryId + ")/" + relationshipName + "/$ref", true);
     req.setRequestHeader("Accept", "application/json");
     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     req.setRequestHeader("OData-MaxVersion", "4.0");
