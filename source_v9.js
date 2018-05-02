@@ -34,8 +34,14 @@ function lookupAddExistingRecords(relationshipName, primaryEntity, relatedEntity
 function associateAddExistingResults(relationshipName, primaryEntity, relatedEntity, parentRecordId, gridControl, results, index) {
     if (index >= results.length) {
         // Refresh the grid once completed
-        Xrm.Page.ui.clearFormNotification("associate");
+        Xrm.Page.ui.setFormNotification("Associated " + index + " record" + (index > 1 ? "s" : ""), "INFO", "associate");
         if (gridControl) { gridControl.refresh(); }
+
+        // Clear the final notification after 2 seconds
+        setTimeout(function() {
+            Xrm.Page.ui.clearFormNotification("associate");
+        }, 2000);
+
         return;
     }
 
