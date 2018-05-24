@@ -1,6 +1,6 @@
 // Custom function to call instead of the OOTB Add Existing button/command - all 3 parameters can be passed as CRM Parameters from the ribbon
 function filterAddExistingContact(selectedEntityTypeName, selectedControl, firstPrimaryItemId) {
-    if (selectedControl.getRelationshipName() == "new_account_contact") {
+    if (selectedControl.getRelationship().name == "new_account_contact") {
         // Custom Account -> Contact N:N - filters to show only contacts with this account as the parentcustomerid
         var options = {
             allowMultiSelect: true,
@@ -26,12 +26,23 @@ function filterAddExistingContact(selectedEntityTypeName, selectedControl, first
 // lookupOptions = options for creating the custom lookup with filters: http://butenko.pro/2017/11/22/microsoft-dynamics-365-v9-0-lookupobjects-closer-look/
 function lookupAddExistingRecords(relationshipName, primaryEntity, relatedEntity, parentRecordId, gridControl, lookupOptions) {
     Xrm.Utility.lookupObjects(lookupOptions).then(function (results) {
-        associateAddExistingResults(relationshipName, primaryEntity, relatedEntity, parentRecordId.replace("{", "").replace("}", ""), gridControl, results, 0)
+        // Get the entitySet name for the primary entity
+        Xrm.Utility.getEntityMetadata(primaryEntity).then(function (primaryEntityData) {
+            var primaryEntitySetName = primaryEntityData.EntitySetName;
+
+            // Get the entitySet name for the related entity
+            Xrm.Utility.getEntityMetadata(relatedEntity).then(function (relatedEntityData) {
+                var relatedEntitySetName = relatedEntityData.EntitySetName;
+
+                // Call the associate web api for each result (recursive)
+                associateAddExistingResults(relationshipName, primaryEntitySetName, relatedEntitySetName, relatedEntity, parentRecordId.replace("{", "").replace("}", ""), gridControl, results, 0)
+            });
+        });
     });
 }
 
 // Used internally by the above function
-function associateAddExistingResults(relationshipName, primaryEntity, relatedEntity, parentRecordId, gridControl, results, index) {
+function associateAddExistingResults(relationshipName, primaryEntitySetName, relatedEntitySetName, relatedEntity, parentRecordId, gridControl, results, index) {
     if (index >= results.length) {
         // Refresh the grid once completed
         Xrm.Page.ui.setFormNotification("Associated " + index + " record" + (index > 1 ? "s" : ""), "INFO", "associate");
@@ -48,7 +59,7 @@ function associateAddExistingResults(relationshipName, primaryEntity, relatedEnt
     Xrm.Page.ui.setFormNotification("Associating record " + (index + 1) + " of " + results.length, "INFO", "associate");
 
     var lookupId = results[index].id.replace("{", "").replace("}", "");
-    var lookupEntity = results[index].typename;
+    var lookupEntity = results[index].entityType || results[index].typename;
 
     var primaryId = parentRecordId;
     var relatedId = lookupId;
@@ -58,10 +69,10 @@ function associateAddExistingResults(relationshipName, primaryEntity, relatedEnt
         relatedId = parentRecordId;
     }
 
-    var association = { '@odata.id': Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + Xrm.Utility.getEntitySetName(relatedEntity) + "(" + relatedId + ")" };
+    var association = { '@odata.id': Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + relatedEntitySetName + "(" + relatedId + ")" };
 
     var req = new XMLHttpRequest();
-    req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + Xrm.Utility.getEntitySetName(primaryEntity) + "(" + primaryId + ")/" + relationshipName + "/$ref", true);
+    req.open("POST", Xrm.Page.context.getClientUrl() + "/api/data/v9.0/" + primaryEntitySetName + "(" + primaryId + ")/" + relationshipName + "/$ref", true);
     req.setRequestHeader("Accept", "application/json");
     req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
     req.setRequestHeader("OData-MaxVersion", "4.0");
@@ -73,14 +84,14 @@ function associateAddExistingResults(relationshipName, primaryEntity, relatedEnt
             if (this.status === 204 || this.status === 1223) {
                 // Success
                 // Process the next item in the list
-                associateAddExistingResults(relationshipName, primaryEntity, relatedEntity, parentRecordId, gridControl, results, index);
+                associateAddExistingResults(relationshipName, primaryEntitySetName, relatedEntitySetName, relatedEntity, parentRecordId, gridControl, results, index);
             }
             else {
                 // Error
                 var error = JSON.parse(this.response).error.message;
                 if (error == "A record with matching key values already exists.") {
                     // Process the next item in the list
-                    associateAddExistingResults(relationshipName, primaryEntity, relatedEntity, parentRecordId, gridControl, results, index);
+                    associateAddExistingResults(relationshipName, primaryEntitySetName, relatedEntitySetName, relatedEntity, parentRecordId, gridControl, results, index);
                 }
                 else {
                     Xrm.Utility.alertDialog(error);
