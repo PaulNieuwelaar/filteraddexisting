@@ -4,10 +4,15 @@ function filterAddExistingContact(selectedEntityTypeName, selectedControl, first
         // Custom Account -> Contact N:N - filters to show only contacts with this account as the parentcustomerid
         var options = {
             allowMultiSelect: true,
+            defaultEntityType: "contact",
             entityTypes: ["contact"],
+            disableMru: true,
             showNew: true,
-            customFilterTypes: [""],
-            customFilters: [encodeURIComponent("<filter type='and'><condition attribute='parentcustomerid' operator='eq' value='" + Xrm.Page.data.entity.getId() + "' /></filter>")]
+            searchText: "\n", // Search by default
+            filters: [{ 
+                entityLogicalName: "contact", 
+                filterXml: "<filter type='and'><condition attribute='parentcustomerid' operator='eq' value='" + Xrm.Page.data.entity.getId() + "' /></filter>" 
+            }];
         };
 
         lookupAddExistingRecords("new_account_contact", "account", "contact", firstPrimaryItemId, selectedControl, options);
