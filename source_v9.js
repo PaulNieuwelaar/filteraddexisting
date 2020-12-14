@@ -59,7 +59,7 @@ function associateAddExistingResults(relationshipName, primaryEntitySetName, rel
 
         // Clear the final notification after 2 seconds
         setTimeout(function () {
-            Xrm.Page.ui.clearFormNotification("associate");
+            formContext.ui.clearFormNotification("associate");
         }, 2000);
 
         return;
