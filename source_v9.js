@@ -50,7 +50,7 @@ function lookupAddExistingRecords(relationshipName, primaryEntity, relatedEntity
 
 // Used internally by the above function
 function associateAddExistingResults(relationshipName, primaryEntitySetName, relatedEntitySetName, relatedEntity, parentRecordId, gridControl, results, index) {
-    var formContext = gridControl.formContext;
+    var formContext = gridControl.formContext || gridControl.getParentForm();
     
     if (index >= results.length) {
         // Refresh the grid once completed
